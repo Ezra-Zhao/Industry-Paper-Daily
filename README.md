@@ -18,6 +18,7 @@ One industry paper a day, explained in plain language — for people who want to
 
 | 日期 | 论文 | 一句话 |
 |---|---|---|
+| 2026-10-01 | DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving | DistServe 把大模型的 prefill 和 decoding 拆到不同 GPU 上，让“读题”和“逐字答题”各自用最合适的资源配方。 |
 
 ## 声明
 

@@ -1,0 +1,36 @@
+# 第 1 篇｜大模型为什么要把“读题”和“答题”拆开
+
+- 论文：DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving（Yinmin Zhong、Shengyu Liu、Junda Chen、Jianbo Hu、Yibo Zhu、Xuanzhe Liu、Xin Jin、Hao Zhang，2024，OSDI '24，pp. 193–210）
+  - USENIX 官方页面：https://www.usenix.org/conference/osdi24/presentation/zhong-yinmin
+  - arXiv:2401.09670：http://arxiv.org/abs/2401.09670
+  - DOI：https://doi.org/10.48550/arXiv.2401.09670
+- 一句话：DistServe 把大模型的 prefill 和 decoding 拆到不同 GPU 上，让“读题”和“逐字答题”各自用最合适的资源配方。
+- 解决什么问题：
+  - prefill 是模型一次读完整段 prompt，并生成第一个 token。
+  - decoding 是模型接着一个 token 一个 token 往外生成答案。
+  - prefill 通常更吃算力，decoding 通常更吃显存带宽。
+  - 两件事挤在同一批 GPU 上，会互相抢资源并互相拖慢。
+  - 结果是系统只能在 TTFT 和 TPOT 之间妥协，或者干脆多买 GPU 硬扛。
+- 方法翻成人话：
+  - prefill 像“读题和打草稿”，会留下一份中间笔记，也就是 KV cache。
+  - decoding 像“照着笔记一字一字写答案”，每写一个字都要回头查笔记。
+  - DistServe 给 prefill 一组 GPU，再给 decoding 一组 GPU。
+  - 系统按 TTFT 和 TPOT 两个服务等级目标（SLO），自动决定每组分多少 GPU，以及怎么并行。
+  - 它还尽量把要交接的阶段放在同一台机器里，好用更快的 NVLink 传 KV cache。
+  - 流量再涨时，它复制整套实例扩容。
+- 关键数字：
+  - 实验条件要先讲清：论文用了 4 台机器、32 张 NVIDIA A100-80GB SXM GPU，机器内是 NVLink，跨机器带宽只有 25 Gbps。
+  - 模型是 OPT-13B、OPT-66B 和 OPT-175B，精度为 FP16；负载来自 ShareGPT、HumanEval 和 LongBench，对照系统是 vLLM 和 DeepSpeed-MII。
+  - 在超过 90% 请求满足延迟目标的前提下，DistServe 最高能把可承载请求率做到对照系统的 7.4 倍，或者把 SLO 收紧到 12.6 倍。
+  - 上面两个倍数是不同场景下的最高值，不是在同一个场景里同时拿到。
+  - 在 OPT-175B 加 ShareGPT 的实验里，KV cache 传输占总延迟不到 0.1%；超过 95% 的请求，传输延迟低于 30 毫秒。
+- 跟我们有什么关系：
+  - 看大模型服务不能只看 tokens/sec，还要看 TTFT、TPOT、SLO attainment 和每张 GPU 的 goodput。
+  - GPU 池规划不只是“加几张卡”，本质上还是调度和网络放置问题。
+  - prefill 队列、decoding 队列、KV cache 传输和两边 GPU 利用率，运维时要分开看。
+  - 真上生产前，必须拿自己的 prompt 长度、输出长度和流量曲线复测，不能直接抄 7.4 倍。
+  - 论文用的是较老的 OPT/MHA 模型；现代模型常用 GQA 或 MQA，KV cache 更小，收益和瓶颈都可能变。
+- 我的判断（证据等级 A）：
+  - A 的意思是数字能回到论文原文核对，而且出处是 OSDI '24 的同行评审论文。
+  - 我信“两个阶段分开调度”这个方向，也信它在论文实验条件下确实赢了。
+  - 我不把 7.4 倍当成生产承诺；换模型、换 GPU、换网络后，倍数必须重测。
