@@ -20,6 +20,7 @@ One industry paper a day, explained in plain language — for people who want to
 |---|---|---|
 | 2026-10-01 | DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving | DistServe 把大模型的 prefill 和 decoding 拆到不同 GPU 上，让“读题”和“逐字答题”各自用最合适的资源配方。 |
 | 2026-10-20 | An aging-sensitive secreted phospholipase confers neuroprotection and cognitive resilience | Pla2g2f 随衰老在海马升高：小鼠敲掉它记忆变差、调高它变好，人脑韧性个体中活性最高——大脑自带的认知韧性开关，目前仍是临床前证据。 |
+| 2026-10-27 | Ultrafast single-qubit gates through multi-photon transition removal | 6.8 纳秒的单比特门也能把泄漏压到 2×10⁻⁵ 以下：真正的拦路虎是以前被忽略的多光子跃迁（0→2、1→3），把脉冲频谱在跃迁频率处挖掉凹口就能压住；目前仅单个比特验证。 |
 
 ## 声明
 
