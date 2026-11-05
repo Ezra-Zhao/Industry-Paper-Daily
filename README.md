@@ -28,3 +28,5 @@ One industry paper a day, explained in plain language — for people who want to
 本仓所有笔记均为本人独立撰写，仅作学习与研究分享，不涉及任何雇主或客户的信息、代码与资源。
 
 All notes here are my own writing, for learning and research sharing only. Nothing here involves any employer or client information, code, or resources.
+
+📣 Telegram 频道：https://t.me/EzraZhao777（各平台的更新都同步到这里）
